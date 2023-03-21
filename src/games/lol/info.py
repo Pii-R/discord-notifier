@@ -36,5 +36,5 @@ class SummonerInfo:
 
 if __name__ == "__main__":
     settings = RiotSettings(_env_file=".env.test", _env_file_encoding="utf-8")
-    suminfo = SummonerInfo(settings, "EUW1", "AEGIS EIKA")
+    suminfo = SummonerInfo(settings, "EUW1", "EggsKeyScore")
     print(suminfo.get_daily_wins())
