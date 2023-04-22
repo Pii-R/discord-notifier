@@ -1,11 +1,12 @@
-from src.games.lol.handler import RiotSettings
-from src.games.lol.info import SummonerInfo
-from src.games.lol.regions import Regions
-from src.games.lol.messages import Message
-from src.messages.discord.handler import DiscordMessageHandler, DiscordSettings
-from src.users.models import User
 import time
 from datetime import datetime
+
+from src.games.lol.handler import RiotSettings
+from src.games.lol.info import SummonerInfo
+from src.games.lol.messages import Message
+from src.games.lol.regions import Regions
+from src.messages.discord.handler import DiscordMessageHandler, DiscordSettings
+from src.users.models import User
 
 SUBSCRIBERS = [
     User(

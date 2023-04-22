@@ -1,7 +1,8 @@
 """Info module"""
+from datetime import datetime
+
 from .handler import RiotHandler, RiotSettings
 from .summoner import Summoner
-from datetime import datetime
 
 
 class SummonerInfo:
