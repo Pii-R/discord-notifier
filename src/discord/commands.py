@@ -3,6 +3,7 @@ from typing import Dict
 
 import discord
 
+from ..database.logic import DatabaseConfiguration, DatabaseOperation
 from .logic import check_command, extract_command_args, extract_command_name
 
 
@@ -35,44 +36,72 @@ class Command(ABC):
 class HelpCommand(Command):
     """Help command displaying info on the bot"""
 
-    def __init__(self):
+    def __init__(self, available_commands: dict[str, Command] = None):
         super().__init__("help", "this is an help command")
+        self.available_commands = available_commands
 
     async def execute(self, message: discord.message.Message):
-        print(f"{message.author.name}, here's your help")
+        available_commands_format = (
+            ", ".join(cmd.name for cmd in self.available_commands.values())
+            if self.available_commands
+            else "no commands available"
+        )
+        await message.channel.send(
+            f"{message.author.name}, here's the list of available commands: {available_commands_format}"
+        )
+
+    def update_commands_list(self, commands_list: dict[str, Command]):
+        """Update the available commands
+
+        Args:
+            commands_list: list of updated commands
+        """
+        self.commands_list = commands_list
 
 
 class SubscribeCommand(Command):
     """Subscribe command allowing user
     to subscribe to notification"""
 
-    def __init__(self):
+    def __init__(self, db_handler: DatabaseOperation):
         super().__init__("subscribe", "this is the subscribe command")
+        self.db_handler = db_handler
 
-    async def return_command_error(message: discord.message.Message):
+    async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")
 
     async def execute(self, message: discord.message.Message):
         args = extract_command_args(message.content)
         if len(args) != 1:
-            await self.return_command_error()
+            await self.return_command_error(message)
             return
         summoner_name = extract_command_args(message.content)[0]
+
+        adding_user = self.db_handler.add_user_with_summoner_name(
+            summoner_name, message.author.id, message.author.name
+        )
+        if adding_user:
+            await message.channel.send(
+                f"Hi {message.author.name}, you're subscribed with {summoner_name}"
+            )
+            return
         await message.channel.send(
-            f"Hi {message.author.name}, you're subscribed with {summoner_name}"
+            f"Hi {message.author.name}, this user is aldready defined"
         )
 
 
 class CommandsHandler:
     """Handler for commands"""
 
-    def __init__(self):
+    def __init__(self, client: discord.Client):
         self.commands: Dict[str, Command] = {}
-        self.add_commands([HelpCommand(), SubscribeCommand()])
+        db_handler = DatabaseOperation(DatabaseConfiguration())
+        self.add_commands([HelpCommand(), SubscribeCommand(db_handler)])
         self.command_regex = r"^[\!][a-z]*(\s[a-z]*)*"
+        self.client = client
 
     def add_commands(self, commands_cls: list[Command]):
-        """Add command to the class
+        """Add intanciated commands to the class
 
         Args:
             name: name of the command
@@ -80,6 +109,9 @@ class CommandsHandler:
         """
         for cmd_cls in commands_cls:
             self.commands[cmd_cls.name] = cmd_cls
+        if "help" in self.commands:
+            help_cmd: HelpCommand = self.commands["help"]
+            help_cmd.update_commands_list(self.commands)
 
     async def handle_command(self, message: discord.message.Message):
         """handle received command
@@ -88,8 +120,21 @@ class CommandsHandler:
             message: message received from user
         """
         if not check_command(message.content, self.command_regex):
+            await self.handle_uncorrect_commands(message)
             return
         cmd_name = extract_command_name(message.content)
 
         cmd_cls = self.commands[cmd_name]
         await cmd_cls.execute(message)
+
+    async def handle_uncorrect_commands(self, message: discord.message.Message):
+        """Function triggered when an unrecognized command is received
+
+        Args:
+            message: message received
+        """
+        if (
+            isinstance(message.channel, discord.DMChannel)
+            and message.author != self.client.user
+        ):
+            await message.channel.send(f"Unrecognized command")

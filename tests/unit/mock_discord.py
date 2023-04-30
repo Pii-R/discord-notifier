@@ -11,15 +11,17 @@ class Author:
 
 class Channel:
     async def send(*args):
-        return
+        ...
 
 
 @dataclass
 class MockDiscordMessage:
     content: str
     author: Author
-    channel = AsyncMock()
+    channel: AsyncMock
 
 
-help_message = MockDiscordMessage("!help", Author(321321, "pierre"))
-sub_message = MockDiscordMessage("!subscribe summoner_name", Author(321321, "pierre"))
+help_message = MockDiscordMessage("!help", Author(321321, "pierre"), AsyncMock())
+sub_message = MockDiscordMessage(
+    "!subscribe summoner_name", Author(321321, "pierre"), AsyncMock()
+)
