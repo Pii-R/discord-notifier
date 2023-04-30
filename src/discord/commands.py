@@ -56,7 +56,7 @@ class HelpCommand(Command):
         Args:
             commands_list: list of updated commands
         """
-        self.commands_list = commands_list
+        self.available_commands = commands_list
 
 
 class SubscribeCommand(Command):
@@ -90,13 +90,56 @@ class SubscribeCommand(Command):
         )
 
 
+class UnsubscribeCommand(Command):
+    """Unsubscribe command allowing user
+    to unsubscribe to notification"""
+
+    def __init__(self, db_handler: DatabaseOperation):
+        super().__init__("unsubscribe", "this is the unsubscribe command")
+        self.db_handler = db_handler
+
+    async def return_command_error(self, message: discord.message.Message):
+        await message.channel.send(f"Error in command, please try again")
+
+    async def execute(self, message: discord.message.Message):
+        removing_user = self.db_handler.remove_user(message.author.id)
+
+        if removing_user:
+            await message.channel.send(
+                f"Hi {message.author.name}, you've been unsubscribed"
+            )
+            return
+        await message.channel.send(f"Hi {message.author.name}, you were not subscribed")
+
+
+class TimeCommand(Command):
+    """Time command allowing user
+    to set time to be notified"""
+
+    def __init__(self, db_handler: DatabaseOperation):
+        super().__init__("time", "this is the time command")
+        self.db_handler = db_handler
+
+    async def return_command_error(self, message: discord.message.Message):
+        await message.channel.send(f"Error in command, please try again")
+
+    async def execute(self, message: discord.message.Message):
+        pass
+
+
 class CommandsHandler:
     """Handler for commands"""
 
     def __init__(self, client: discord.Client):
         self.commands: Dict[str, Command] = {}
         db_handler = DatabaseOperation(DatabaseConfiguration())
-        self.add_commands([HelpCommand(), SubscribeCommand(db_handler)])
+        self.add_commands(
+            [
+                HelpCommand(),
+                SubscribeCommand(db_handler),
+                UnsubscribeCommand(db_handler),
+            ]
+        )
         self.command_regex = r"^[\!][a-z]*(\s[a-z]*)*"
         self.client = client
 

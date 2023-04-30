@@ -37,6 +37,6 @@ async def test_init_commands_handler():
     """Check correct initialization of the commands handler"""
     mock_client = MagicMock()
     cmds_handler = CommandsHandler(mock_client)
-    assert len(cmds_handler.commands) == 2
+    assert len(cmds_handler.commands) == 3
 
     await cmds_handler.handle_command(help_message)

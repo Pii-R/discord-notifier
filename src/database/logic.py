@@ -30,3 +30,22 @@ class DatabaseOperation:
         self.session.add(user)
         self.session.commit()
         return True
+
+    def remove_user(self, discord_id: int) -> bool:
+        """Add user with summoner name in the database
+
+        Args:
+            summoner_name: summoner name from Riot
+            discord_id: discord id
+        """
+        discord_id_exists_db = self.session.query(DiscordUser).filter(
+            DiscordUser.discord_id == discord_id
+        )
+        if discord_id_exists_db.count() == 0:
+            return False
+
+        if discord_id_exists_db.count() != 0:
+            deletion = self.session.query(DiscordUser).get(discord_id)
+            self.session.delete(deletion)
+            self.session.commit()
+            return True

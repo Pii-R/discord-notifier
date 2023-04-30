@@ -7,6 +7,7 @@ import discord
 
 from ..logger.logger import logger
 from .commands import CommandsHandler
+from .notifier import prepare_task
 
 
 class DiscordSettings(BaseSettings):
@@ -26,6 +27,7 @@ class DiscordClient(discord.Client):
 
     async def on_ready(self):
         print("Notifier is ready to serve")
+        await prepare_task([239145363041157122, 354731036644737024], self)
 
     async def on_message(self, message: discord.message.Message):
         """Function triggered when the bot received a message
@@ -33,6 +35,7 @@ class DiscordClient(discord.Client):
         Args:
             message: message received by the bot
         """
+
         logger.debug(f"{message.author.name} in {message.channel}: {message.content}")
         await self.commands_handler.handle_command(message)
 

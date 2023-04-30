@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger("bot_logger")
 logger.setLevel(logging.DEBUG)
 # create file handler which logs even debug messages
-fh = logging.FileHandler("notifier.log")
+fh = logging.FileHandler("notifier.log", encoding="utf-8")
 fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
