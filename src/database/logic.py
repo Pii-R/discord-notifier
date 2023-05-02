@@ -1,6 +1,6 @@
 """Logic for database manipulation"""
 from .configuration import DatabaseConfiguration
-from .user import DiscordUser
+from .models import DiscordUser
 
 
 class DatabaseOperation:
