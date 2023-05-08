@@ -18,5 +18,14 @@ class UserSettings(Base):
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     discord_id = Column(Integer, ForeignKey("discord_user.discord_id"))
+    notification_id = Column(Integer, ForeignKey("notifications.id"))
     schedule = Column(String)
     discord = relationship("DiscordUser", back_populates="settings")
+    notifications = relationship("Notifications", back_populates="settings")
+
+
+class Notifications(Base):
+    __tablename__ = "notifications"
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    description = Column(String)
+    settings = relationship("UserSettings", back_populates="notifications")
