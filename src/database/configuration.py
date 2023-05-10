@@ -21,3 +21,14 @@ class DatabaseConfiguration:
     def __init__(self, engine: Engine = prd_engine):
         execute_engine(engine)
         self.session = session_factory(engine)
+
+    def initialize_table(self, table: Base, content: dict):
+        """initialize a table with a dict
+
+        Args:
+            table: table to initialize
+            content: content to add to the table
+        """
+        values_to_add = [table(**rows) for rows in content]
+        self.session.add_all(values_to_add)
+        self.session.commit()
