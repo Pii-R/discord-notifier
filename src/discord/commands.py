@@ -77,7 +77,7 @@ class SubscribeCommand(Command):
             return
         summoner_name = extract_command_args(message.content)[0]
 
-        adding_user = self.db_handler.add_user_with_summoner_name(
+        adding_user = self.db_handler.add_user(
             summoner_name, message.author.id, message.author.name
         )
         if adding_user:
@@ -132,14 +132,15 @@ class CommandsHandler:
 
     def __init__(self, client: discord.Client, db_handler: DatabaseOperation = None):
         self.commands: Dict[str, Command] = {}
+        self.db_handler = db_handler
         if not db_handler:
-            db_handler = DatabaseOperation(DatabaseConfiguration())
+            self.db_handler = DatabaseOperation(DatabaseConfiguration())
 
         self.add_commands(
             [
                 HelpCommand(),
-                SubscribeCommand(db_handler),
-                UnsubscribeCommand(db_handler),
+                SubscribeCommand(self.db_handler),
+                UnsubscribeCommand(self.db_handler),
             ]
         )
         self.command_regex = r"^[\!][a-z]*(\s[a-z]*)*"

@@ -28,3 +28,10 @@ class Notifications(Base):
     id: Mapped[int] = Column(Integer, primary_key=True)
     description = Column(String)
     settings = relationship("UserSettings", back_populates="notifications")
+
+
+class Citations(Base):
+    __tablename__ = "citations"
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    text = Column(String)
+    author = Column(String, nullable=True)
