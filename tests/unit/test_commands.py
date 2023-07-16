@@ -3,7 +3,10 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from sqlalchemy import create_engine
 
+from src.database.configuration import DatabaseConfiguration
+from src.database.logic import DatabaseOperation
 from src.discord.commands import CommandsHandler, HelpCommand, SubscribeCommand
 
 from .mock_discord import help_message, sub_message
@@ -33,10 +36,15 @@ async def test_sub_command():
 
 
 @pytest.mark.asyncio
-async def test_init_commands_handler():
+async def test_init_commands_handler(shared_datadir):
     """Check correct initialization of the commands handler"""
     mock_client = MagicMock()
-    cmds_handler = CommandsHandler(mock_client)
+    db_handler = DatabaseOperation(
+        DatabaseConfiguration(
+            create_engine(f"sqlite:///{shared_datadir}/discord_bot_test.sqlite")
+        )
+    )
+    cmds_handler = CommandsHandler(mock_client, db_handler)
     assert len(cmds_handler.commands) == 3
 
     await cmds_handler.handle_command(help_message)

@@ -130,9 +130,11 @@ class TimeCommand(Command):
 class CommandsHandler:
     """Handler for commands"""
 
-    def __init__(self, client: discord.Client):
+    def __init__(self, client: discord.Client, db_handler: DatabaseOperation = None):
         self.commands: Dict[str, Command] = {}
-        db_handler = DatabaseOperation(DatabaseConfiguration())
+        if not db_handler:
+            db_handler = DatabaseOperation(DatabaseConfiguration())
+
         self.add_commands(
             [
                 HelpCommand(),

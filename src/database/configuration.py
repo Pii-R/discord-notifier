@@ -5,8 +5,6 @@ from sqlalchemy.orm import sessionmaker
 
 from .base import Base
 
-prd_engine = create_engine("sqlite:///discord_bot.sqlite")
-
 
 def session_factory(engine: Engine):
     Session = sessionmaker(bind=engine)
@@ -18,7 +16,9 @@ def execute_engine(engine: Engine):
 
 
 class DatabaseConfiguration:
-    def __init__(self, engine: Engine = prd_engine):
+    def __init__(self, engine: Engine = None):
+        if not engine:
+            engine = create_engine("sqlite:///discord_bot.sqlite")
         execute_engine(engine)
         self.session = session_factory(engine)
 

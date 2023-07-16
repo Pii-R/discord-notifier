@@ -27,7 +27,7 @@ class DiscordClient(discord.Client):
 
     async def on_ready(self):
         print("Notifier is ready to serve")
-        await prepare_task([239145363041157122, 354731036644737024], self)
+        await prepare_task([239145363041157122, 239145363041157122], self)
 
     async def on_message(self, message: discord.message.Message):
         """Function triggered when the bot received a message
@@ -51,5 +51,6 @@ class DiscordBot:
 
 if __name__ == "__main__":
     settings = DiscordSettings(_env_file=".env.test", _env_file_encoding="utf-8")
+    print(settings)
     bot = DiscordBot(settings)
     bot.run()
