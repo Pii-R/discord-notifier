@@ -30,8 +30,8 @@ class Notifications(Base):
     settings = relationship("UserSettings", back_populates="notifications")
 
 
-class Citations(Base):
-    __tablename__ = "citations"
+class Quotes(Base):
+    __tablename__ = "quotes"
     id: Mapped[int] = Column(Integer, primary_key=True)
-    text = Column(String)
+    quote = Column(String)
     author = Column(String, nullable=True)

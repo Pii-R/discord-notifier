@@ -29,9 +29,7 @@ async def test_sub_command():
     sub = SubscribeCommand(mock_db_handler)
     assert sub.prefix == "!"
     await sub.execute(sub_message)
-    expected_message = (
-        f"Hi {sub_message.author.name}, you're subscribed with summoner_name"
-    )
+    expected_message = f"Hi {sub_message.author.name}, you're subscribed to the bot"
     sub_message.channel.send.assert_called_once_with(expected_message)
 
 

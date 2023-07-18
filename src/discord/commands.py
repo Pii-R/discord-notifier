@@ -75,14 +75,11 @@ class SubscribeCommand(Command):
         if len(args) != 1:
             await self.return_command_error(message)
             return
-        summoner_name = extract_command_args(message.content)[0]
 
-        adding_user = self.db_handler.add_user(
-            summoner_name, message.author.id, message.author.name
-        )
+        adding_user = self.db_handler.add_user(message.author.id, message.author.name)
         if adding_user:
             await message.channel.send(
-                f"Hi {message.author.name}, you're subscribed with {summoner_name}"
+                f"Hi {message.author.name}, you're subscribed to the bot"
             )
             return
         await message.channel.send(
@@ -130,12 +127,9 @@ class TimeCommand(Command):
 class CommandsHandler:
     """Handler for commands"""
 
-    def __init__(self, client: discord.Client, db_handler: DatabaseOperation = None):
+    def __init__(self, client: discord.Client, db_handler: DatabaseOperation):
         self.commands: Dict[str, Command] = {}
         self.db_handler = db_handler
-        if not db_handler:
-            self.db_handler = DatabaseOperation(DatabaseConfiguration())
-
         self.add_commands(
             [
                 HelpCommand(),

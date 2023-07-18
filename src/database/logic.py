@@ -1,6 +1,9 @@
 """Logic for database manipulation"""
+import random
+from typing import List
+
 from .configuration import DatabaseConfiguration
-from .models import DiscordUser
+from .models import DiscordUser, Quotes
 
 
 class DatabaseOperation:
@@ -46,3 +49,25 @@ class DatabaseOperation:
             self.session.delete(deletion)
             self.session.commit()
             return True
+
+    def get_all_subscribed_user(self) -> List[int]:
+        """Retrieve all subscribed users
+
+        Returns:
+            List of users' discord id
+        """
+        return [
+            result.discord_id
+            for result in self.session.query(DiscordUser.discord_id).all()
+        ]
+
+    def get_random_quote(self) -> str:
+        """get a random quote from Quotes table
+
+        Returns:
+            the chosen quote
+        """
+
+        rand = random.randrange(0, self.session.query(Quotes).count())
+        row = self.session.query(Quotes)[rand]
+        return row.quote
