@@ -42,8 +42,9 @@ class DiscordClient(discord.Client):
         """
 
         logger.debug(f"{message.author.name} in {message.channel}: {message.content}")
-        await self.commands_handler.handle_command(message)
-        await prepare_tasks(self.db_handler, self)
+        if not message.author.bot:
+            await self.commands_handler.handle_command(message)
+            self.tasks = await prepare_tasks(self.db_handler, self)
 
 
 class DiscordBot:

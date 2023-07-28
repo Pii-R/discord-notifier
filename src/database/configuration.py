@@ -8,9 +8,10 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
 from .base import Base
-from .models import Quotes
+from .models import Notifications, Quotes
 
 QUOTES_PATH = Path(__file__).parent.parent.parent / "quotes.csv"
+NOTIFICATIONS_PATH = Path(__file__).parent.parent.parent / "notifications.csv"
 
 
 def session_factory(engine: Engine):
@@ -28,7 +29,8 @@ class DatabaseConfiguration:
             engine = create_engine("sqlite:///discord_bot.sqlite")
         execute_engine(engine)
         self.session = session_factory(engine)
-        self.initialize_table(Quotes, convert_csv_to_dict(QUOTES_PATH, ","))
+        self.initialize_table(Quotes, convert_csv_to_dict(QUOTES_PATH))
+        self.initialize_table(Notifications, convert_csv_to_dict(NOTIFICATIONS_PATH))
 
     def initialize_table(self, table: Base, content: dict):
         """initialize a table with a dict
@@ -42,7 +44,7 @@ class DatabaseConfiguration:
         self.session.commit()
 
 
-def convert_csv_to_dict(csv_path: Path, delimiter: str) -> List[dict[str, Any]]:
+def convert_csv_to_dict(csv_path: Path, delimiter: str = ",") -> List[dict[str, Any]]:
     """Converts a csv to a dict
 
     Args:

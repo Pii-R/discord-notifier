@@ -26,6 +26,7 @@ class UserSettings(Base):
 class Notifications(Base):
     __tablename__ = "notifications"
     id: Mapped[int] = Column(Integer, primary_key=True)
+    name = Column(String)
     description = Column(String)
     settings = relationship("UserSettings", back_populates="notifications")
 

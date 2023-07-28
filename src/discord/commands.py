@@ -77,6 +77,8 @@ class SubscribeCommand(Command):
             return
 
         adding_user = self.db_handler.add_user(message.author.id, message.author.name)
+        self.db_handler.set_notification_time(message.author.id, "0 21 * * *", 1)
+
         if adding_user:
             await message.channel.send(
                 f"Hi {message.author.name}, you're subscribed to the bot"

@@ -12,3 +12,4 @@ riotwatcher
 pytest-asyncio
 pre-commit
 pytest-datadir
+croniter

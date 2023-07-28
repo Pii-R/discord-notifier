@@ -1,2 +1,6 @@
-Demander à chatgpt comment faire pour mettre à jour des tasks asynchrone lors d'un message discord en découplant l'action de la liste personne concernée
-ATTENTION: on message est déclenché lorsque un message apparaît dans la conversation avec le bot => ce qui pose problème avec l'update actuelle.
+Continuer à mettre en place la logique de notifications au premier lancement du bot
+- vérifier le lien entre UserSettings et Notifications
+- commande pour afficher toutes les notifications disponibles
+- subscribe de base à la notification 1
+- sinon mettre la possibilité de changer
+- décoder crontab pour avoir la prochaine exécution, faire attention au timezone mettre utc ?
