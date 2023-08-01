@@ -139,7 +139,7 @@ class CommandsHandler:
                 UnsubscribeCommand(self.db_handler),
             ]
         )
-        self.command_regex = r"^[\!][a-z]*(\s[a-z]*)*"
+        self.command_regex = r"^[\!][a-z]{1,}(\s[a-z]*)*"
         self.client = client
 
     def add_commands(self, commands_cls: list[Command]):

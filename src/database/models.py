@@ -19,8 +19,8 @@ class UserSettings(Base):
     discord_id = Column(Integer, ForeignKey("discord_user.discord_id"))
     notification_id = Column(Integer, ForeignKey("notifications.id"))
     schedule = Column(String)
-    discord = relationship("DiscordUser", back_populates="settings")
-    notifications = relationship("Notifications", back_populates="settings")
+    discord = relationship("DiscordUser", foreign_keys=[discord_id])
+    notifications = relationship("Notifications", foreign_keys=[notification_id])
 
 
 class Notifications(Base):

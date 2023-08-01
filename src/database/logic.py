@@ -113,6 +113,5 @@ class DatabaseOperation:
         """
 
         rand = random.randrange(0, self.session.query(Quotes).count())
-        print(rand)
         row = self.session.query(Quotes)[rand]
         return row.quote
