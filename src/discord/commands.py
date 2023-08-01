@@ -75,14 +75,13 @@ class SubscribeCommand(Command):
         if len(args) != 1:
             await self.return_command_error(message)
             return
-        summoner_name = extract_command_args(message.content)[0]
 
-        adding_user = self.db_handler.add_user_with_summoner_name(
-            summoner_name, message.author.id, message.author.name
-        )
+        adding_user = self.db_handler.add_user(message.author.id, message.author.name)
+        self.db_handler.set_notification_time(message.author.id, "0 21 * * *", 1)
+
         if adding_user:
             await message.channel.send(
-                f"Hi {message.author.name}, you're subscribed with {summoner_name}"
+                f"Hi {message.author.name}, you're subscribed to the bot"
             )
             return
         await message.channel.send(
@@ -112,12 +111,12 @@ class UnsubscribeCommand(Command):
         await message.channel.send(f"Hi {message.author.name}, you were not subscribed")
 
 
-class TimeCommand(Command):
+class SetTimeCommand(Command):
     """Time command allowing user
     to set time to be notified"""
 
     def __init__(self, db_handler: DatabaseOperation):
-        super().__init__("time", "this is the time command")
+        super().__init__("time", "this is the command to set notification's time")
         self.db_handler = db_handler
 
     async def return_command_error(self, message: discord.message.Message):
@@ -130,16 +129,14 @@ class TimeCommand(Command):
 class CommandsHandler:
     """Handler for commands"""
 
-    def __init__(self, client: discord.Client, db_handler: DatabaseOperation = None):
+    def __init__(self, client: discord.Client, db_handler: DatabaseOperation):
         self.commands: Dict[str, Command] = {}
-        if not db_handler:
-            db_handler = DatabaseOperation(DatabaseConfiguration())
-
+        self.db_handler = db_handler
         self.add_commands(
             [
                 HelpCommand(),
-                SubscribeCommand(db_handler),
-                UnsubscribeCommand(db_handler),
+                SubscribeCommand(self.db_handler),
+                UnsubscribeCommand(self.db_handler),
             ]
         )
         self.command_regex = r"^[\!][a-z]*(\s[a-z]*)*"

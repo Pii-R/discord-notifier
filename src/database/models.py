@@ -26,5 +26,13 @@ class UserSettings(Base):
 class Notifications(Base):
     __tablename__ = "notifications"
     id: Mapped[int] = Column(Integer, primary_key=True)
+    name = Column(String)
     description = Column(String)
     settings = relationship("UserSettings", back_populates="notifications")
+
+
+class Quotes(Base):
+    __tablename__ = "quotes"
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    quote = Column(String)
+    author = Column(String, nullable=True)
