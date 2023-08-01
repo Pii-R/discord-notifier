@@ -111,12 +111,12 @@ class UnsubscribeCommand(Command):
         await message.channel.send(f"Hi {message.author.name}, you were not subscribed")
 
 
-class TimeCommand(Command):
+class SetTimeCommand(Command):
     """Time command allowing user
     to set time to be notified"""
 
     def __init__(self, db_handler: DatabaseOperation):
-        super().__init__("time", "this is the time command")
+        super().__init__("time", "this is the command to set notification's time")
         self.db_handler = db_handler
 
     async def return_command_error(self, message: discord.message.Message):
