@@ -3,7 +3,7 @@ from typing import Dict
 
 import discord
 
-from ..database.logic import DatabaseConfiguration, DatabaseOperation
+from ..database.logic import DatabaseOperation
 from .logic import check_command, extract_command_args, extract_command_name
 
 
@@ -71,11 +71,6 @@ class SubscribeCommand(Command):
         await message.channel.send(f"Error in command, please try again")
 
     async def execute(self, message: discord.message.Message):
-        args = extract_command_args(message.content)
-        if len(args) != 1:
-            await self.return_command_error(message)
-            return
-
         adding_user = self.db_handler.add_user(message.author.id, message.author.name)
         self.db_handler.set_notification_time(message.author.id, "0 21 * * *", 1)
 
@@ -165,7 +160,9 @@ class CommandsHandler:
             await self.handle_uncorrect_commands(message)
             return
         cmd_name = extract_command_name(message.content)
-
+        if cmd_name not in self.commands:
+            await self.handle_uncorrect_commands(message)
+            return
         cmd_cls = self.commands[cmd_name]
         await cmd_cls.execute(message)
 

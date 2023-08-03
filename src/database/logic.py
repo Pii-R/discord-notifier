@@ -3,6 +3,7 @@ import random
 from datetime import datetime
 from typing import List
 
+from .base import Base
 from .configuration import DatabaseConfiguration
 from .models import DiscordUser, Notifications, Quotes, UserSettings
 
@@ -115,3 +116,21 @@ class DatabaseOperation:
         rand = random.randrange(0, self.session.query(Quotes).count())
         row = self.session.query(Quotes)[rand]
         return row.quote
+
+    def insert_rows_to_table(self, table: Base, content: dict):
+        """insert dict into table
+
+        Args:
+            table: table to update
+            content: content to add
+        """
+        new_rows = []
+
+        # Check if the rows already exist and filter out duplicates
+        for data in content:
+            row_exists = self.session.query(table).filter_by(**data).first()
+            if not row_exists:
+                new_row = table(**data)
+                new_rows.append(new_row)
+            self.session.add_all(new_rows)
+            self.session.commit()

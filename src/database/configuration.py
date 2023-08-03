@@ -34,9 +34,6 @@ class DatabaseConfiguration:
         self.session = session_factory(engine)
         if not default_engine_already_exists:
             self.initialize_table(Quotes, convert_csv_to_dict(QUOTES_PATH))
-            self.initialize_table(
-                Notifications, convert_csv_to_dict(NOTIFICATIONS_PATH)
-            )
 
     def initialize_table(self, table: Base, content: dict):
         """initialize a table with a dict

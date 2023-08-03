@@ -16,3 +16,5 @@ def test_check_id_for_task_class():
         T1("task1", "first task")
 
     assert t1.id != t2.id
+    assert isinstance(t1.id, int)
+    assert isinstance(t2.id, int)

@@ -1,14 +1,13 @@
 """Main logic of the bot"""
 
 
-import asyncio
-
 from pydantic import BaseSettings, Field
 
 import discord
 
 from ..database.logic import DatabaseConfiguration, DatabaseOperation
 from ..logger.logger import logger
+from ..tasks.task import TaskHandler
 from .commands import CommandsHandler
 from .notifier import prepare_tasks
 
@@ -29,10 +28,12 @@ class DiscordClient(discord.Client):
 
         self.db_handler = DatabaseOperation(DatabaseConfiguration())
         self.commands_handler = CommandsHandler(self, self.db_handler)
+        self.tasks_handler = TaskHandler(self, self.db_handler)
 
     async def on_ready(self):
         print("Notifier is ready to serve")
-        self.tasks = await prepare_tasks(self.db_handler, self)
+        # self.tasks = await prepare_tasks(self.db_handler, self)
+        await self.tasks_handler.start_tasks()
 
     async def on_message(self, message: discord.message.Message):
         """Function triggered when the bot received a message
@@ -44,7 +45,7 @@ class DiscordClient(discord.Client):
         logger.debug(f"{message.author.name} in {message.channel}: {message.content}")
         if not message.author.bot:
             await self.commands_handler.handle_command(message)
-            self.tasks = await prepare_tasks(self.db_handler, self)
+            await self.tasks_handler.start_tasks()
 
 
 class DiscordBot:
