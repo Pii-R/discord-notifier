@@ -1,10 +1,18 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
+
+from tabulate import tabulate
 
 import discord
 
-from ..database.logic import DatabaseConfiguration, DatabaseOperation
-from .logic import check_command, extract_command_args, extract_command_name
+from ..database.logic import DatabaseOperation
+from .logic import (
+    check_command,
+    extract_command_args,
+    extract_command_name,
+    extract_schedule_input,
+    format_dict_list_to_table_for_discord,
+)
 
 
 class Command(ABC):
@@ -71,11 +79,6 @@ class SubscribeCommand(Command):
         await message.channel.send(f"Error in command, please try again")
 
     async def execute(self, message: discord.message.Message):
-        args = extract_command_args(message.content)
-        if len(args) != 1:
-            await self.return_command_error(message)
-            return
-
         adding_user = self.db_handler.add_user(message.author.id, message.author.name)
         self.db_handler.set_notification_time(message.author.id, "0 21 * * *", 1)
 
@@ -116,30 +119,69 @@ class SetTimeCommand(Command):
     to set time to be notified"""
 
     def __init__(self, db_handler: DatabaseOperation):
-        super().__init__("time", "this is the command to set notification's time")
+        super().__init__(
+            "time", "this is the command to set notification's time to a specific task"
+        )
+        self.db_handler = db_handler
+
+    async def return_command_error(self, message: discord.message.Message):
+        await message.channel.send(
+            f"Error in command, you need to specify an id and schedule. Ex: {self.prefix}{self.name} 1 0 * * * *"
+        )
+
+    async def execute(self, message: discord.message.Message):
+        args = extract_schedule_input(message.content, self.prefix)
+        if len(args) != 3:
+            await self.return_command_error(message)
+            return
+        self.db_handler.update_schedule(args[1], args[2])
+        await message.channel.send(f"Your subscriptions has been updated")
+
+
+class StatusCommand(Command):
+    """To get status of the bot"""
+
+    def __init__(self):
+        super().__init__("status", "this is the status command")
+
+    async def return_command_error(self, message: discord.message.Message):
+        await message.channel.send(f"Error in command, please try again")
+
+    async def execute(self, message: discord.message.Message):
+        await message.channel.send(f"Hi {message.author.name}, your bot is alive")
+
+
+class SubscripionsCommand(Command):
+    def __init__(self, db_handler: DatabaseOperation):
+        super().__init__(
+            "subscriptions",
+            "this is the subscritpions command to list all susbcritions",
+        )
         self.db_handler = db_handler
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")
 
     async def execute(self, message: discord.message.Message):
-        pass
+        subscriptions = self.db_handler.get_subscriptions_details(message.author.id)
+
+        format_message = f"You have {len(subscriptions)} subscriptions:\n\n{format_dict_list_to_table_for_discord(subscriptions)}"
+        await message.channel.send(format_message)
 
 
 class CommandsHandler:
     """Handler for commands"""
 
-    def __init__(self, client: discord.Client, db_handler: DatabaseOperation):
-        self.commands: Dict[str, Command] = {}
+    def __init__(
+        self,
+        commands: List[Dict[str, Command]] | None,
+        client: discord.Client,
+        db_handler: DatabaseOperation,
+    ):
+        self.commands = commands if not commands else {}
         self.db_handler = db_handler
-        self.add_commands(
-            [
-                HelpCommand(),
-                SubscribeCommand(self.db_handler),
-                UnsubscribeCommand(self.db_handler),
-            ]
-        )
-        self.command_regex = r"^[\!][a-z]*(\s[a-z]*)*"
+        self.add_commands(commands)
+        self.command_regex = r"^[\!][a-z_]{1,}"
         self.client = client
 
     def add_commands(self, commands_cls: list[Command]):
@@ -165,7 +207,9 @@ class CommandsHandler:
             await self.handle_uncorrect_commands(message)
             return
         cmd_name = extract_command_name(message.content)
-
+        if cmd_name not in self.commands:
+            await self.handle_uncorrect_commands(message)
+            return
         cmd_cls = self.commands[cmd_name]
         await cmd_cls.execute(message)
 

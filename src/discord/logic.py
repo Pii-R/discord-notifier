@@ -1,6 +1,8 @@
 """Logic behind commands handling"""
 import re
-from typing import Tuple
+from typing import List, Tuple
+
+from tabulate import tabulate
 
 
 def extract_command_name_and_args(command_text: str) -> Tuple[str, list[str]]:
@@ -57,3 +59,39 @@ def check_command(command_text: str, command_regex: str) -> bool:
     """
     command_re = re.match(command_regex, command_text)
     return command_re is not None
+
+
+def format_dict_list_to_table_for_discord(data_list):
+    """Format a list of dict into a pretty table to send via discord
+
+    Args:
+        data_list: list of dict to format
+
+    Returns:
+       formated string
+    """
+    if not data_list or not isinstance(data_list, list):
+        return "Input data must be a non-empty list of dictionaries."
+
+    headers = data_list[0].keys()
+    rows = [list(item.values()) for item in data_list]
+
+    table = tabulate(rows, headers=headers, tablefmt="rounded_outline")
+    return "```\n" + table + "\n```"
+
+
+def extract_schedule_input(text: str, prefix: str):
+    # Extracting the subscription ID and cron expression from the command
+    pattern = (
+        rf"^\{prefix}"
+        + r"([a-z]+)\s(\d+)\s+((?:\*|\d+)\s+(?:\*|\d+)\s+(?:\*|\d+)\s+(?:\*|\d+)\s+(?:\*|\d+))$"
+    )
+    print(pattern)
+    match = re.match(pattern, text)
+    if match:
+        command = match.group(1)
+        subscription_id = int(match.group(2))
+        cron_expression = match.group(3)
+        return command, subscription_id, cron_expression
+    else:
+        return None, None

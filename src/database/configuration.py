@@ -24,13 +24,16 @@ def execute_engine(engine: Engine):
 
 
 class DatabaseConfiguration:
+    DEFAULT_ENGINE_PATH = Path("default_discord_bot.sqlite")
+
     def __init__(self, engine: Engine = None):
-        if not engine:
-            engine = create_engine("sqlite:///discord_bot.sqlite")
+        default_engine_already_exists = self.DEFAULT_ENGINE_PATH.exists()
+        if not engine or not default_engine_already_exists:
+            engine = create_engine(f"sqlite:///{self.DEFAULT_ENGINE_PATH}")
         execute_engine(engine)
         self.session = session_factory(engine)
-        self.initialize_table(Quotes, convert_csv_to_dict(QUOTES_PATH))
-        self.initialize_table(Notifications, convert_csv_to_dict(NOTIFICATIONS_PATH))
+        if not default_engine_already_exists:
+            self.initialize_table(Quotes, convert_csv_to_dict(QUOTES_PATH))
 
     def initialize_table(self, table: Base, content: dict):
         """initialize a table with a dict
