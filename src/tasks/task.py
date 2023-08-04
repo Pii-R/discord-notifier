@@ -1,12 +1,13 @@
 import asyncio
-import hashlib
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Any, List
 
 import discord
 
 from ..database.logic import DatabaseOperation
 from ..database.models import Notifications
+from .utils import cron_to_datetime
 
 
 class Task(ABC):
@@ -36,6 +37,11 @@ class Task(ABC):
     def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
+        self.subtasks = {}
+
+    @abstractmethod
+    def prepare_tasks(self):
+        ...
 
 
 class InspiringQuoteTask(Task):
@@ -45,19 +51,18 @@ class InspiringQuoteTask(Task):
         )
         self.db_handler = db_handler
         self.client = client
-        self.subtasks = {}
 
     async def prepare_tasks(
         self,
     ):
-        users_id = self.db_handler.get_all_subscribed_user()
+        users_schedule = self.db_handler.get_all_subscribed_users_to_task(self.id)
         for task in self.subtasks.values():
             task.cancel()
-        for user_id in users_id:
-            self.subtasks[user_id] = asyncio.create_task(
-                self.send_personnalized_message(
-                    user_id,
-                )
+        for detail in users_schedule:
+            cron = detail[1]
+
+            self.subtasks[detail[0]] = asyncio.create_task(
+                self.send_personnalized_message(detail[0], cron)
             )
         await asyncio.gather(*self.subtasks.values())
         return self.subtasks
@@ -74,16 +79,27 @@ class InspiringQuoteTask(Task):
         quote = self.db_handler.get_random_quote()
         return f"Your inspiring quote of the day:\n{quote}"
 
-    async def send_personnalized_message(self, user_id: int):
+    async def send_personnalized_message(self, user_id: int, cron: str):
         # Wait until the scheduled time
-        wait = 60
         while 1:
+            current_time = datetime.now()
+            target_time = cron_to_datetime(cron)
+            # Calculate the time difference to the target time
+            time_diff = (target_time - current_time).total_seconds()
+            print(target_time, time_diff)
+            # If the target time has already passed, schedule the message for the next day
+            if time_diff <= 0:
+                target_time += datetime.timedelta(days=1)
+                time_diff = (target_time - current_time).total_seconds()
+
+            # Wait until the target time is reached
+            await asyncio.sleep(time_diff)
+
             message = self.create_message_of_random_quote()
             user = await self.client.fetch_user(int(user_id))
             # Send the message to the user
             await user.send(message)
             print(f"sent to {user_id}")
-            await asyncio.sleep(wait)
 
 
 class TaskHandler:

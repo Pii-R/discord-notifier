@@ -1,7 +1,6 @@
 """Logic for database manipulation"""
 import random
-from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 from .base import Base
 from .configuration import DatabaseConfiguration
@@ -106,6 +105,22 @@ class DatabaseOperation:
             for result in self.session.query(DiscordUser.discord_id).all()
         ]
 
+    def get_all_subscribed_users_to_task(self, task_id: int) -> List[Tuple[int, str]]:
+        """Return all subscribed users to a given task
+
+        Args:
+            task_id: given task id
+
+        Returns:
+            list of given user susbscribed to the given task
+        """
+        return [
+            (result.discord_id, result.schedule)
+            for result in self.session.query(UserSettings)
+            .filter(UserSettings.notification_id == task_id)
+            .all()
+        ]
+
     def get_random_quote(self) -> str:
         """get a random quote from Quotes table
 
@@ -133,4 +148,50 @@ class DatabaseOperation:
                 new_row = table(**data)
                 new_rows.append(new_row)
             self.session.add_all(new_rows)
+            self.session.commit()
+
+    def get_subscriptions_details(self, user_id: int) -> List[dict]:
+        """return all susbcriptions from a user id
+
+        Args:
+            user_id: user id
+
+        Returns:
+            the detailed list of the user's subscriptions
+        """
+        query = (
+            self.session.query(
+                UserSettings.id,
+                Notifications.name,
+                UserSettings.schedule,
+            )
+            .join(DiscordUser, UserSettings.discord_id == DiscordUser.discord_id)
+            .join(Notifications, UserSettings.notification_id == Notifications.id)
+        )
+
+        results = query.filter(UserSettings.discord_id == user_id).all()
+        return [
+            {
+                "id": subscriptions_id,
+                "subscription_name": notification_name,
+                "schedule": schedule,
+            }
+            for subscriptions_id, notification_name, schedule in results
+        ]
+
+    def update_schedule(self, subscription_id: int, new_schedule: str):
+        """Update schedule of the given subscription id
+
+        Args:
+            subscription_id: id of the subscription
+        """
+        user_settings = (
+            self.session.query(UserSettings).filter_by(id=subscription_id).first()
+        )
+
+        if user_settings:
+            # Update the schedule field
+            user_settings.schedule = new_schedule
+
+            # Commit the changes to the database
             self.session.commit()

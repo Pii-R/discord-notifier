@@ -8,8 +8,15 @@ import discord
 from ..database.logic import DatabaseConfiguration, DatabaseOperation
 from ..logger.logger import logger
 from ..tasks.task import TaskHandler
-from .commands import CommandsHandler
-from .notifier import prepare_tasks
+from .commands import (
+    CommandsHandler,
+    HelpCommand,
+    SetTimeCommand,
+    StatusCommand,
+    SubscribeCommand,
+    SubscripionsCommand,
+    UnsubscribeCommand,
+)
 
 
 class DiscordSettings(BaseSettings):
@@ -27,12 +34,22 @@ class DiscordClient(discord.Client):
         )
 
         self.db_handler = DatabaseOperation(DatabaseConfiguration())
-        self.commands_handler = CommandsHandler(self, self.db_handler)
+        self.commands_handler = CommandsHandler(
+            [
+                HelpCommand(),
+                SubscribeCommand(self.db_handler),
+                UnsubscribeCommand(self.db_handler),
+                StatusCommand(),
+                SubscripionsCommand(self.db_handler),
+                SetTimeCommand(self.db_handler),
+            ],
+            self,
+            self.db_handler,
+        )
         self.tasks_handler = TaskHandler(self, self.db_handler)
 
     async def on_ready(self):
         print("Notifier is ready to serve")
-        # self.tasks = await prepare_tasks(self.db_handler, self)
         await self.tasks_handler.start_tasks()
 
     async def on_message(self, message: discord.message.Message):

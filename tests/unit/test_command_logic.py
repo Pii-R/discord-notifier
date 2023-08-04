@@ -1,5 +1,9 @@
 """Tests for command logic"""
-from src.discord.logic import check_command, extract_command_name_and_args
+from src.discord.logic import (
+    check_command,
+    extract_command_name_and_args,
+    extract_schedule_input,
+)
 
 
 def test_check_command_format():
@@ -17,3 +21,8 @@ def test_command_extraction():
 
     command = "!subscribe pierre"
     assert extract_command_name_and_args(command) == ("subscribe", ["pierre"])
+
+
+def test_extraction_schedule():
+    user_input = "!command 1 * 8 8 * *"
+    assert extract_schedule_input(user_input, "!") == ("command", 1, "* 8 8 * *")
