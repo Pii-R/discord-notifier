@@ -12,3 +12,4 @@ Continuer à mettre en place la logique de notifications au premier lancement du
 - utiliser github pages afin de partager l'adresse du bot
 - ajout d'un timezone dans la base pour déterminer l'heure d'envoi. Par défaut UTC+2 Paris
     - mettre une liste des timezones et proposer à l'utilisateur de choisir parmis sa liste afin de définir son timezone.
+- run as a service
