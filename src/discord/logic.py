@@ -86,7 +86,6 @@ def extract_schedule_input(text: str, prefix: str):
         rf"^\{prefix}"
         + r"([a-z]+)\s(\d+)\s+((?:\*|\d+)\s+(?:\*|\d+)\s+(?:\*|\d+)\s+(?:\*|\d+)\s+(?:\*|\d+))$"
     )
-    print(pattern)
     match = re.match(pattern, text)
     if match:
         command = match.group(1)

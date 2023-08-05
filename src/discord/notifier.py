@@ -16,7 +16,6 @@ async def send_personnalized_message(
         user = await client.fetch_user(int(user_id))
         # Send the message to the user
         await user.send(message)
-        print(f"sent to {user_id}")
         await asyncio.sleep(wait)
 
 

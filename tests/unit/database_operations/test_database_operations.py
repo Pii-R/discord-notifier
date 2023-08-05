@@ -57,7 +57,6 @@ def test_link_between_user_settings_and_notifications(shared_datadir):
     db_handler = DatabaseOperation(conf)
     db_handler.set_notification_time(user.discord_id, "0 21 * * *", 1)
     user_settings = conf.session.query(UserSettings).all()
-    print(user_settings[0])
 
 
 def test_get_all_subscribed_users_to_a_specific_task(shared_datadir):

@@ -37,7 +37,6 @@ def get_sleep_time_until_next_occurence(cron: str) -> int:
     target_time = cron_to_datetime(cron)
     # Calculate the time difference to the target time
     time_diff = (target_time - current_time).total_seconds()
-    print(target_time, time_diff)
     # If the target time has already passed, schedule the message for the next day
     if time_diff <= 0:
         target_time += datetime.timedelta(days=1)
