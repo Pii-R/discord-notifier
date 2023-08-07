@@ -10,8 +10,10 @@ from ..logger.logger import logger
 from ..tasks.task import TaskHandler
 from .commands import (
     CommandsHandler,
+    GetTimezoneCommand,
     HelpCommand,
     SetTimeCommand,
+    SetTimezoneCommand,
     StatusCommand,
     SubscribeCommand,
     SubscripionsCommand,
@@ -42,6 +44,8 @@ class DiscordClient(discord.Client):
                 StatusCommand(),
                 SubscripionsCommand(self.db_handler),
                 SetTimeCommand(self.db_handler),
+                GetTimezoneCommand(self.db_handler),
+                SetTimezoneCommand(self.db_handler),
             ],
             self,
             self.db_handler,

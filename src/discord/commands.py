@@ -8,6 +8,7 @@ import discord
 from ..database.logic import DatabaseOperation
 from .logic import (
     check_command,
+    check_valid_timezone,
     extract_command_args,
     extract_command_name,
     extract_schedule_input,
@@ -166,6 +167,51 @@ class SubscripionsCommand(Command):
         subscriptions = self.db_handler.get_subscriptions_details(message.author.id)
 
         format_message = f"You have {len(subscriptions)} subscriptions:\n\n{format_dict_list_to_table_for_discord(subscriptions)}"
+        await message.channel.send(format_message)
+
+
+class GetTimezoneCommand(Command):
+    def __init__(self, db_handler: DatabaseOperation):
+        super().__init__("timezone", "Get the current timezone")
+        self.db_handler = db_handler
+
+    async def return_command_error(self, message: discord.message.Message):
+        await message.channel.send(f"Error in command, please try again")
+
+    async def execute(self, message: discord.message.Message):
+        users_timezone = self.db_handler.get_timezone(message.author.id)
+
+        format_message = f"Selected timezone: {users_timezone}"
+        await message.channel.send(format_message)
+
+
+class SetTimezoneCommand(Command):
+    def __init__(self, db_handler: DatabaseOperation):
+        super().__init__(
+            "settimezone",
+            "Set the current timezone. Full list here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
+        )
+        self.db_handler = db_handler
+
+    async def return_command_error(self, message: discord.message.Message):
+        await message.channel.send(f"Error in command, please try again")
+
+    async def execute(self, message: discord.message.Message):
+        args = extract_command_args(message.content)
+        print(message.content)
+        if len(args) != 1:
+            await self.return_command_error(message)
+            return
+
+        timezone = args[0]
+
+        if not check_valid_timezone(timezone):
+            await message.channel.send("Given timezone invalid")
+            return
+
+        users_timezone = self.db_handler.set_timezone(message.author.id, timezone)
+
+        format_message = f"Selected timezone: {timezone}"
         await message.channel.send(format_message)
 
 

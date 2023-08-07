@@ -2,6 +2,7 @@
 import re
 from typing import List, Tuple
 
+import pytz
 from tabulate import tabulate
 
 
@@ -94,3 +95,15 @@ def extract_schedule_input(text: str, prefix: str):
         return command, subscription_id, cron_expression
     else:
         return None, None
+
+
+def check_valid_timezone(timezone_to_check: str) -> bool:
+    """Check if given string match a valid timezone
+
+    Args:
+        timezone_to_check: timezone to check
+
+    Returns:
+        True, if valid timezone. Else False
+    """
+    return timezone_to_check in pytz.common_timezones

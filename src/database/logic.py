@@ -195,3 +195,42 @@ class DatabaseOperation:
 
             # Commit the changes to the database
             self.session.commit()
+
+    def get_timezone(self, user_id: str) -> str:
+        """Returns the current timezone of the given user
+
+        Args:
+            user_id: id of the user
+
+        Returns:
+            timezone of the user
+        """
+        users_timezone = (
+            self.session.query(DiscordUser.timezone)
+            .filter_by(discord_id=user_id)
+            .first()
+        )
+
+        return users_timezone[0]
+
+    def set_timezone(self, user_id: str, timezone: str):
+        """Set the timezone for the given user
+
+        Args:
+            user_id: id of the user
+            timezone: timezone to add
+
+        """
+        user = (
+            self.session.query(DiscordUser)
+            .filter(DiscordUser.discord_id == user_id)
+            .first()
+        )
+
+        if not user:
+            return False
+
+        user.timezone = timezone
+        self.session.commit()
+
+        return True
