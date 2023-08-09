@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, List
 
+import pytz
+
 import discord
 
 from ..database.logic import DatabaseOperation
@@ -58,11 +60,10 @@ class InspiringQuoteTask(Task):
         users_schedule = self.db_handler.get_all_subscribed_users_to_task(self.id)
         for task in self.subtasks.values():
             task.cancel()
-        for detail in users_schedule:
-            cron = detail[1]
-
-            self.subtasks[detail[0]] = asyncio.create_task(
-                self.send_personnalized_message(detail[0], cron)
+        for user_id, cron in users_schedule:
+            timezone = self.db_handler.get_timezone(user_id)
+            self.subtasks[user_id] = asyncio.create_task(
+                self.send_personnalized_message(user_id, cron, timezone)
             )
         await asyncio.gather(*self.subtasks.values())
         return self.subtasks
@@ -79,11 +80,11 @@ class InspiringQuoteTask(Task):
         quote = self.db_handler.get_random_quote()
         return f"Your inspiring quote of the day:\n{quote}"
 
-    async def send_personnalized_message(self, user_id: int, cron: str):
+    async def send_personnalized_message(self, user_id: int, cron: str, timezone: str):
         # Wait until the scheduled time
         while 1:
-            current_time = datetime.now()
-            target_time = cron_to_datetime(cron)
+            current_time = datetime.now(tz=pytz.timezone(timezone))
+            target_time = cron_to_datetime(cron, timezone)
             # Calculate the time difference to the target time
             time_diff = (target_time - current_time).total_seconds()
             # If the target time has already passed, schedule the message for the next day
@@ -92,6 +93,7 @@ class InspiringQuoteTask(Task):
                 time_diff = (target_time - current_time).total_seconds()
 
             # Wait until the target time is reached
+            print(time_diff / 60 / 60)
             await asyncio.sleep(time_diff)
 
             message = self.create_message_of_random_quote()
@@ -117,6 +119,11 @@ class TaskHandler:
         self.db_handler.insert_rows_to_table(Notifications, self.get_tasks_details())
 
     def get_tasks_details(self) -> List[dict[str, Any]]:
+        """Returns all the Task defined in the object in a dictionnary
+
+        Returns:
+            {id of the task, name and description}
+        """
         return [
             {"id": task.id, "name": task.name, "description": task.description}
             for task in self.tasks

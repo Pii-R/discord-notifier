@@ -9,6 +9,7 @@ class DiscordUser(Base):
 
     discord_id = Column(Integer, primary_key=True, autoincrement=False)
     discord_name = Column(String)
+    timezone = Column(String, default="Europe/Paris")
     settings = relationship("UserSettings", back_populates="discord")
 
 
