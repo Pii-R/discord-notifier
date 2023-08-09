@@ -106,4 +106,4 @@ def check_valid_timezone(timezone_to_check: str) -> bool:
     Returns:
         True, if valid timezone. Else False
     """
-    return timezone_to_check in pytz.common_timezones
+    return timezone_to_check in pytz.all_timezones

@@ -121,6 +121,22 @@ class DatabaseOperation:
             .all()
         ]
 
+    def get_user_timezone(self, user_id: str) -> str:
+        """get the timezone defined by the user
+
+        Args:
+            user_id: id of the user
+
+        Returns:
+            timezone selected by the user
+        """
+        result = (
+            self.session.query(DiscordUser.timezone)
+            .filter(DiscordUser.notification_id == user_id)
+            .first()
+        )
+        return result.timezone
+
     def get_random_quote(self) -> str:
         """get a random quote from Quotes table
 

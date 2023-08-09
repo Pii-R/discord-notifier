@@ -209,7 +209,7 @@ class SetTimezoneCommand(Command):
             await message.channel.send("Given timezone invalid")
             return
 
-        users_timezone = self.db_handler.set_timezone(message.author.id, timezone)
+        self.db_handler.set_timezone(message.author.id, timezone)
 
         format_message = f"Selected timezone: {timezone}"
         await message.channel.send(format_message)
