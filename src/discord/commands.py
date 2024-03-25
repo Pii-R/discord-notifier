@@ -14,7 +14,7 @@ from .logic import (
     extract_schedule_input,
     format_dict_list_to_table_for_discord,
 )
-
+from ..tasks.task import TaskHandler
 
 class Command(ABC):
     """Abstract class for commands"""
@@ -23,6 +23,7 @@ class Command(ABC):
         self.name = name
         self.description = description
         self.prefix = "!"
+        self.is_changing_task = False
 
     @abstractmethod
     def execute(self, message: discord.message.Message):
@@ -75,6 +76,7 @@ class SubscribeCommand(Command):
     def __init__(self, db_handler: DatabaseOperation):
         super().__init__("subscribe", "this is the subscribe command")
         self.db_handler = db_handler
+        self.is_changing_task = True
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")
@@ -100,6 +102,8 @@ class UnsubscribeCommand(Command):
     def __init__(self, db_handler: DatabaseOperation):
         super().__init__("unsubscribe", "this is the unsubscribe command")
         self.db_handler = db_handler
+        self.is_changing_task = True
+        
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")
@@ -124,6 +128,8 @@ class SetTimeCommand(Command):
             "time", "this is the command to set notification's time to a specific task"
         )
         self.db_handler = db_handler
+        self.is_changing_task = True
+        
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(
@@ -165,8 +171,8 @@ class SubscripionsCommand(Command):
 
     async def execute(self, message: discord.message.Message):
         subscriptions = self.db_handler.get_subscriptions_details(message.author.id)
-
-        format_message = f"You have {len(subscriptions)} subscriptions:\n\n{format_dict_list_to_table_for_discord(subscriptions)}"
+    
+        format_message = f"You have {len(subscriptions)} subscriptions:\n\n{format_dict_list_to_table_for_discord(subscriptions,headers=["id", "subscription_name", "schedule"])}"
         await message.channel.send(format_message)
 
 
@@ -192,13 +198,14 @@ class SetTimezoneCommand(Command):
             "Set the current timezone. Full list here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
         )
         self.db_handler = db_handler
+        self.is_changing_task = True
+        
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")
 
     async def execute(self, message: discord.message.Message):
         args = extract_command_args(message.content)
-        print(message.content)
         if len(args) != 1:
             await self.return_command_error(message)
             return
@@ -243,7 +250,7 @@ class CommandsHandler:
             help_cmd: HelpCommand = self.commands["help"]
             help_cmd.update_commands_list(self.commands)
 
-    async def handle_command(self, message: discord.message.Message):
+    async def handle_command(self, message: discord.message.Message,task_handler:TaskHandler):
         """handle received command
 
         Args:
@@ -256,8 +263,10 @@ class CommandsHandler:
         if cmd_name not in self.commands:
             await self.handle_uncorrect_commands(message)
             return
-        cmd_cls = self.commands[cmd_name]
+        cmd_cls:Command = self.commands[cmd_name]
         await cmd_cls.execute(message)
+        if cmd_cls.is_changing_task:
+            await task_handler.start_tasks()
 
     async def handle_uncorrect_commands(self, message: discord.message.Message):
         """Function triggered when an unrecognized command is received

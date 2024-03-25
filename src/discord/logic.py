@@ -1,4 +1,5 @@
 """Logic behind commands handling"""
+
 import re
 from typing import List, Tuple
 
@@ -62,7 +63,7 @@ def check_command(command_text: str, command_regex: str) -> bool:
     return command_re is not None
 
 
-def format_dict_list_to_table_for_discord(data_list):
+def format_dict_list_to_table_for_discord(data_list, headers: list[str]):
     """Format a list of dict into a pretty table to send via discord
 
     Args:
@@ -72,9 +73,8 @@ def format_dict_list_to_table_for_discord(data_list):
        formated string
     """
     if not data_list or not isinstance(data_list, list):
-        return "Input data must be a non-empty list of dictionaries."
+        data_list = [{}]
 
-    headers = data_list[0].keys()
     rows = [list(item.values()) for item in data_list]
 
     table = tabulate(rows, headers=headers, tablefmt="rounded_outline")

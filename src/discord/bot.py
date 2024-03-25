@@ -1,6 +1,5 @@
 """Main logic of the bot"""
 
-
 from pydantic import BaseSettings, Field
 
 import discord
@@ -65,8 +64,9 @@ class DiscordClient(discord.Client):
 
         logger.debug(f"{message.author.name} in {message.channel}: {message.content}")
         if not message.author.bot:
-            await self.commands_handler.handle_command(message)
-            await self.tasks_handler.start_tasks()
+            await self.commands_handler.handle_command(message,self.tasks_handler)
+            # if message match a command that change a task
+            # await self.tasks_handler.start_tasks()
 
 
 class DiscordBot:

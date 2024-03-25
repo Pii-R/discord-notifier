@@ -1,4 +1,5 @@
 """Logic for sending notification to subsribers"""
+
 import asyncio
 
 import discord

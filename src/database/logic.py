@@ -1,4 +1,5 @@
 """Logic for database manipulation"""
+
 import random
 from typing import List, Tuple
 
@@ -204,7 +205,7 @@ class DatabaseOperation:
         user_settings = (
             self.session.query(UserSettings).filter_by(id=subscription_id).first()
         )
-
+        print(subscription_id,new_schedule)
         if user_settings:
             # Update the schedule field
             user_settings.schedule = new_schedule

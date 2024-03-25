@@ -42,8 +42,7 @@ class Task(ABC):
         self.subtasks = {}
 
     @abstractmethod
-    def prepare_tasks(self):
-        ...
+    def prepare_tasks(self): ...
 
 
 class InspiringQuoteTask(Task):
