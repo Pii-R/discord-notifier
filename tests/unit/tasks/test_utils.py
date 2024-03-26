@@ -1,4 +1,5 @@
 """Tests of utils tasks function"""
+
 from datetime import datetime, timedelta
 from unittest.mock import patch
 

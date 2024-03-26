@@ -16,7 +16,7 @@ from src.discord.commands import (
 
 from .mock_discord import help_message, sub_message
 
-
+from src.tasks.task import TaskHandler
 @pytest.mark.asyncio
 async def test_help_command():
     """Test for help commands"""

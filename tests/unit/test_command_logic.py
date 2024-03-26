@@ -1,4 +1,5 @@
 """Tests for command logic"""
+
 from src.discord.logic import (
     check_command,
     extract_command_name_and_args,

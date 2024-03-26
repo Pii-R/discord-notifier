@@ -6,6 +6,7 @@ from tabulate import tabulate
 import discord
 
 from ..database.logic import DatabaseOperation
+from ..tasks.task import TaskHandler
 from .logic import (
     check_command,
     check_valid_timezone,
@@ -14,7 +15,7 @@ from .logic import (
     extract_schedule_input,
     format_dict_list_to_table_for_discord,
 )
-from ..tasks.task import TaskHandler
+
 
 class Command(ABC):
     """Abstract class for commands"""
@@ -103,7 +104,7 @@ class UnsubscribeCommand(Command):
         super().__init__("unsubscribe", "this is the unsubscribe command")
         self.db_handler = db_handler
         self.is_changing_task = True
-        
+
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")
@@ -129,7 +130,7 @@ class SetTimeCommand(Command):
         )
         self.db_handler = db_handler
         self.is_changing_task = True
-        
+
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(
@@ -171,7 +172,7 @@ class SubscripionsCommand(Command):
 
     async def execute(self, message: discord.message.Message):
         subscriptions = self.db_handler.get_subscriptions_details(message.author.id)
-    
+
         format_message = f"You have {len(subscriptions)} subscriptions:\n\n{format_dict_list_to_table_for_discord(subscriptions,headers=["id", "subscription_name", "schedule"])}"
         await message.channel.send(format_message)
 
@@ -199,7 +200,7 @@ class SetTimezoneCommand(Command):
         )
         self.db_handler = db_handler
         self.is_changing_task = True
-        
+
 
     async def return_command_error(self, message: discord.message.Message):
         await message.channel.send(f"Error in command, please try again")

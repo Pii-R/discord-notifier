@@ -1,4 +1,5 @@
 """Mock ressources for discord tests"""
+
 from dataclasses import dataclass
 from unittest.mock import AsyncMock
 
@@ -10,8 +11,7 @@ class Author:
 
 
 class Channel:
-    async def send(*args):
-        ...
+    async def send(*args): ...
 
 
 @dataclass

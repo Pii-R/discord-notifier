@@ -1,4 +1,5 @@
 """Tests of operations on database"""
+
 from sqlalchemy import create_engine
 
 from src.database.configuration import DatabaseConfiguration

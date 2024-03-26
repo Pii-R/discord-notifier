@@ -64,7 +64,7 @@ class DiscordClient(discord.Client):
 
         logger.debug(f"{message.author.name} in {message.channel}: {message.content}")
         if not message.author.bot:
-            await self.commands_handler.handle_command(message,self.tasks_handler)
+            await self.commands_handler.handle_command(message, self.tasks_handler)
             # if message match a command that change a task
             # await self.tasks_handler.start_tasks()
 
